@@ -1,28 +1,28 @@
-name: Deploy to Server
+name: Deploy to fcc server
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: Setup SSH
+      - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+          echo "${{ secrets.SERVER_DEPLOY_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan root.fcc.lol >> ~/.ssh/known_hosts
 
-      - name: Push to server
+      - name: Deploy
         run: |
-          git remote add production ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/home/dan/services/space-api
-          GIT_SSH_COMMAND="ssh -i ~/.ssh/deploy_key" git push production main --force
+          git remote add fcc-server fcc@root.fcc.lol:/home/fcc/services/space-api
+          git push fcc-server main
